@@ -199,7 +199,7 @@ body {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -366,6 +366,145 @@ body {
 
   display: none !important;
 
+}
+.ticket-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 12px;
+}
+
+.ticket-line {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 6px;
+  border: 0;
+  border-bottom: 1px solid #edf0f3;
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.ticket-line:active {
+  background: #f6f8fa;
+}
+
+.ticket-line__quantity {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 9px;
+  background: #eafaf0;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ticket-line__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ticket-line__content strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-line__content small {
+  color: var(--color-muted);
+  font-size: 10px;
+}
+
+.ticket-line__total {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.ticket-summary {
+  padding: 12px 0 0;
+}
+
+.ticket-count {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.ticket-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticket-total strong {
+  font-size: 24px;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.recap-header {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+}
+
+.recap-header h1 {
+  margin: 0;
+  text-align: center;
+}
+
+.recap-content {
+  display: grid;
+  gap: 14px;
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.recap-card {
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.recap-card > span {
+  color: var(--color-muted);
+}
+
+.recap-card > strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 32px;
+}
+
+.recap-card h2 {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.recap-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.recap-row:last-child {
+  border-bottom: 0;
 }
 
 @media (min-width: 700px) {

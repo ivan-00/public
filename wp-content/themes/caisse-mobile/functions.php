@@ -72,3 +72,17 @@ function caisse_mobile_theme_setup(): void
 }
 
 add_action('after_setup_theme', 'caisse_mobile_theme_setup');
+$recap_path = get_template_directory() . '/assets/js/recap.js';
+$recap_url  = get_template_directory_uri() . '/assets/js/recap.js';
+
+wp_enqueue_script(
+    'caisse-mobile-recap',
+    $recap_url,
+    [
+        'caisse-mobile-storage',
+        'caisse-mobile-vente',
+        'caisse-mobile-encaissement'
+    ],
+    file_exists($recap_path) ? filemtime($recap_path) : null,
+    true
+);

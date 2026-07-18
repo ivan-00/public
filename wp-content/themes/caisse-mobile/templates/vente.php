@@ -24,11 +24,17 @@
 
             <section class="checkout-bottom">
 
-                <div class="ticket-total">
-                    <span>Total</span>
-                    <strong id="ticket-total">0,00 €</strong>
-                </div>
+                <div class="ticket-summary">
+                <span id="ticket-count" class="ticket-count">
+                    0 article
+                </span>
+<div class="ticket-total">
+<span>Total</span>
+        <strong id="ticket-total">0,00 €</strong>
+</div>
 
+</div>
+<!-- 
                 <div class="numeric-keypad">
                     <button type="button">7</button>
                     <button type="button">8</button>
@@ -49,7 +55,7 @@
                     <button type="button">00</button>
                     <button type="button">,</button>
                     <button type="button" class="key-clear">C</button>
-                </div>
+                </div> -->
 
               <button
 
@@ -102,7 +108,7 @@
             <nav class="bottom-navigation">
                 <button type="button">Vente</button>
                 <button type="button">Historique</button>
-                <button type="button">Récapitulatif</button>
+                <button id="open-recap" type="button" > Récapitulatif </button>
                 <button type="button">Paramètres</button>
             </nav>
 

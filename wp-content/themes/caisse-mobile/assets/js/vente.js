@@ -96,54 +96,128 @@ function clearTicket() {
 }
 
 function renderTicket() {
+
   const ticketItems = document.getElementById("ticket-items");
+
   const ticketTotal = document.getElementById("ticket-total");
 
+  const checkoutButton = document.getElementById("open-checkout");
+
+  const itemCount = document.getElementById("ticket-count");
+
   if (!ticketItems || !ticketTotal) {
+
     return;
+
   }
 
+  const total = calculateTotal();
+
+  const totalQuantity = ticket.reduce((sum, item) => {
+
+    return sum + item.quantity;
+
+  }, 0);
+
   if (ticket.length === 0) {
+
     ticketItems.innerHTML = `
+
       <div class="ticket-empty">
+
         <span>Aucun produit</span>
+
         <small>Ajoutez des produits au ticket</small>
+
       </div>
+
     `;
 
     ticketTotal.textContent = formatPrice(0);
+
+    if (itemCount) {
+
+      itemCount.textContent = "0 article";
+
+    }
+
+    if (checkoutButton) {
+
+      checkoutButton.textContent = "Encaisser";
+
+      checkoutButton.disabled = true;
+
+    }
+
     return;
+
   }
 
   ticketItems.innerHTML = ticket
+
     .map((item) => {
+
       const lineTotal = item.price * item.quantity;
 
       return `
-        <div class="ticket-line">
 
-          <div>
-            <strong>
-              ${item.quantity} × ${item.name}
-            </strong>
+        <button
 
-            <small>
-              ${formatPrice(item.price)} l’unité
-            </small>
-          </div>
+          type="button"
 
-          <span>
-            ${formatPrice(lineTotal)}
+          class="ticket-line"
+
+          data-ticket-product-id="${item.id}"
+
+        >
+
+          <span class="ticket-line__quantity">
+
+            ${item.quantity}×
+
           </span>
 
-        </div>
+          <span class="ticket-line__content">
+
+            <strong>${item.name}</strong>
+
+            <small>${formatPrice(item.price)} l’unité</small>
+
+          </span>
+
+          <strong class="ticket-line__total">
+
+            ${formatPrice(lineTotal)}
+
+          </strong>
+
+        </button>
+
       `;
+
     })
+
     .join("");
 
-  ticketTotal.textContent = formatPrice(calculateTotal());
-}
+  ticketTotal.textContent = formatPrice(total);
 
+  if (itemCount) {
+
+    itemCount.textContent =
+
+      `${totalQuantity} article${totalQuantity > 1 ? "s" : ""}`;
+
+  }
+
+  if (checkoutButton) {
+
+    checkoutButton.textContent = `Encaisser • ${formatPrice(total)}`;
+
+    checkoutButton.disabled = false;
+
+  }
+
+}
 function initVente() {
   renderProducts();
   renderTicket();

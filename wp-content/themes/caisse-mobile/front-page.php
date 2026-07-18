@@ -23,6 +23,7 @@ if (!defined('ABSPATH')) {
     <?php get_template_part('templates/vente'); ?>
     <?php get_template_part('templates/encaissement'); ?>
     <?php get_template_part('templates/modal-rendu'); ?>
+    <?php get_template_part('templates/recap'); ?>
 </main>
 
 <?php wp_footer(); ?>
