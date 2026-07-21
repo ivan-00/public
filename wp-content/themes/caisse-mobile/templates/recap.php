@@ -1,3 +1,4 @@
+<main class="app-content">
 <section id="recapPage" class="app-page" hidden>
 
     <div class="recap-content">
@@ -46,3 +47,5 @@
     </div>
 
 </section>
+</main>
+

@@ -1,13 +1,25 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-  initVente();
-  initEncaissement();
-  initRecap();
-  initHistory();
-  initNavigation();
-  updateCurrentDate();
-  showPage("salePage", "Vente");
+    if (typeof initVente === "function") {
+        initVente();
+    }
+
+    if (typeof initEncaissement === "function") {
+        initEncaissement();
+    }
+
+    if (typeof initRecap === "function") {
+        initRecap();
+    }
+
+    if (typeof initHistory === "function") {
+        initHistory();
+    }
+
+    initNavigation();
+    updateCurrentDate();
+    showPage("salePage", "Vente");
 });
 
 function initNavigation() {

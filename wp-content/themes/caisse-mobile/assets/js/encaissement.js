@@ -258,22 +258,33 @@ function finishCardPayment() {
 
 function saveCurrentSale() {
   if (typeof saveSale !== "function") {
+    console.error("La fonction saveSale est introuvable.");
     return;
   }
 
+  const total = calculateTotal();
+  const timestamp = Date.now();
+
   saveSale({
-    id: `sale-${Date.now()}`,
+    id: `sale-${timestamp}`,
+    ticketNumber: `T-${timestamp}`,
     date: new Date().toISOString(),
-    items: ticket.map((item) => ({ ...item })),
-    total: calculateTotal(),
+
+    items: ticket.map((item) => ({
+      ...item
+    })),
+
+    total: total,
     paymentMethod: selectedPaymentMethod,
-    received:
+
+    receivedAmount:
       selectedPaymentMethod === "cash"
         ? receivedAmount
-        : calculateTotal(),
-    change:
+        : total,
+
+    changeAmount:
       selectedPaymentMethod === "cash"
-        ? calculateChange()
+        ? Math.max(receivedAmount - total, 0)
         : 0
   });
 }
@@ -297,8 +308,8 @@ function resetSale(saveBeforeReset = true) {
   renderTicket();
   showPage("salePage", "Vente");
 }
-function initEncaissement() {
 
+function initEncaissement() {
   console.log("initEncaissement exécutée");
 
   const checkoutButton = document.getElementById("open-checkout");
@@ -306,85 +317,56 @@ function initEncaissement() {
   console.log("Bouton Encaisser :", checkoutButton);
 
   if (!checkoutButton) {
-
     console.error("Le bouton #open-checkout est introuvable");
-
     return;
-
   }
 
   checkoutButton.addEventListener("click", () => {
-
     console.log("Clic sur Encaisser");
-
     openCheckout();
-
   });
 
   document
-
     .getElementById("back-to-sale")
-
     ?.addEventListener("click", backToSale);
 
   document.querySelectorAll(".payment-method").forEach((button) => {
-
     button.addEventListener("click", () => {
-
       selectPaymentMethod(button.dataset.paymentMethod);
-
     });
-
   });
 
   document
-
     .getElementById("open-amount-modal")
-
     ?.addEventListener("click", openAmountModal);
 
   document
-
     .getElementById("close-amount-modal")
-
     ?.addEventListener("click", closeAmountModal);
 
   document
-
     .querySelector("[data-close-amount-modal]")
-
     ?.addEventListener("click", closeAmountModal);
 
-  document.querySelectorAll("#amount-keypad [data-key]").forEach((button) => {
-
-    button.addEventListener("click", () => {
-
-      handleAmountKey(button.dataset.key);
-
+  document
+    .querySelectorAll("#amount-keypad [data-key]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        handleAmountKey(button.dataset.key);
+      });
     });
 
-  });
-
   document
-
     .getElementById("confirm-amount")
-
     ?.addEventListener("click", confirmReceivedAmount);
 
   document
-
     .getElementById("confirm-payment")
-
     ?.addEventListener("click", confirmPayment);
 
   document
-
     .getElementById("new-sale")
-
     ?.addEventListener("click", () => {
-
       resetSale(true);
-
     });
-
 }

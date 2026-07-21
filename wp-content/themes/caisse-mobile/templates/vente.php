@@ -1,6 +1,6 @@
 <header class="app-header">
     <div class="header-left">
-        <h1>Ma caisse</h1>
+        <h1>Poul Fetan</h1>
         <h2 id="current-page-title" class="header-page-title">Vente</h2>
     </div>
 
