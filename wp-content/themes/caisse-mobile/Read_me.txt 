@@ -1,0 +1,1178 @@
+# Caisse Mobile
+
+Application de caisse développée en HTML, CSS, JavaScript et intégrée dans un thème WordPress.
+
+Ce document explique l’organisation du projet, le rôle de chaque fichier, la circulation des données et les règles à respecter pour éviter les conflits entre les différentes pages.
+
+---
+
+## 1. Objectif du projet
+
+L’application permet actuellement de :
+
+- afficher un catalogue de produits ;
+- ajouter des produits à un ticket ;
+- calculer automatiquement le total ;
+- vider le ticket ;
+- encaisser une vente ;
+- choisir un moyen de paiement ;
+- enregistrer les ventes ;
+- consulter l’historique ;
+- consulter un récapitulatif ;
+- afficher le chiffre d’affaires ;
+- afficher le nombre de ventes ;
+- afficher les paiements ;
+- afficher la quantité de chaque produit vendu ;
+- naviguer entre Vente, Historique, Récapitulatif et Paramètres.
+
+L’application est pensée principalement pour une utilisation sur tablette ou ordinateur.
+
+---
+
+## 2. Architecture recommandée
+
+```text
+caisse-mobile/
+│
+├── style.css
+├── functions.php
+├── README.md
+│
+├── templates/
+│   └── caisse-app.php
+│
+└── assets/
+    │
+    ├── css/
+    │   ├── app.css
+    │   ├── vente.css
+    │   ├── encaissement.css
+    │   ├── historique.css
+    │   ├── recap.css
+    │   └── responsive.css
+    │
+    └── js/
+        ├── app.js
+        ├── products.js
+        ├── storage.js
+        ├── vente.js
+        ├── encaissement.js
+        ├── historique.js
+        └── recap.js
+```
+
+---
+
+## 3. Rôle de chaque fichier
+
+### `style.css`
+
+Fichier obligatoire d’un thème WordPress.
+
+Il contient au minimum les informations du thème :
+
+```css
+/*
+Theme Name: Caisse Mobile
+Author: Ivan
+Version: 1.0
+*/
+```
+
+Il ne doit pas contenir tout le CSS de l’application. Les styles principaux doivent rester dans `assets/css/`.
+
+---
+
+### `functions.php`
+
+Ce fichier sert à configurer le thème WordPress.
+
+Il charge les fichiers CSS et JavaScript dans le bon ordre.
+
+Il doit notamment :
+
+- charger les feuilles de style ;
+- charger les scripts ;
+- gérer les dépendances entre scripts ;
+- utiliser `filemtime()` pour éviter les problèmes de cache pendant le développement.
+
+Exemple :
+
+```php
+<?php
+
+function caisse_mobile_assets() {
+    $theme_uri = get_template_directory_uri();
+    $theme_path = get_template_directory();
+
+    wp_enqueue_style(
+        'caisse-app',
+        $theme_uri . '/assets/css/app.css',
+        [],
+        filemtime($theme_path . '/assets/css/app.css')
+    );
+
+    wp_enqueue_script(
+        'caisse-products',
+        $theme_uri . '/assets/js/products.js',
+        [],
+        filemtime($theme_path . '/assets/js/products.js'),
+        true
+    );
+
+    wp_enqueue_script(
+        'caisse-storage',
+        $theme_uri . '/assets/js/storage.js',
+        [],
+        filemtime($theme_path . '/assets/js/storage.js'),
+        true
+    );
+
+    wp_enqueue_script(
+        'caisse-app',
+        $theme_uri . '/assets/js/app.js',
+        ['caisse-storage'],
+        filemtime($theme_path . '/assets/js/app.js'),
+        true
+    );
+
+    wp_enqueue_script(
+        'caisse-vente',
+        $theme_uri . '/assets/js/vente.js',
+        ['caisse-products', 'caisse-storage', 'caisse-app'],
+        filemtime($theme_path . '/assets/js/vente.js'),
+        true
+    );
+}
+
+add_action('wp_enqueue_scripts', 'caisse_mobile_assets');
+```
+
+---
+
+### `templates/caisse-app.php`
+
+Ce fichier contient la structure HTML principale de l’application.
+
+Il contient :
+
+- le header ;
+- le titre général ;
+- la date ;
+- les différentes pages ;
+- la navigation du bas ;
+- les fenêtres modales.
+
+Structure recommandée :
+
+```html
+<main id="caisse-app">
+
+    <header class="app-header">
+        <div class="header-left">
+            <h1>Ma caisse</h1>
+
+            <h2 id="current-page-title" class="header-page-title">
+                Vente
+            </h2>
+        </div>
+
+        <div id="currentDate" class="current-date"></div>
+    </header>
+
+    <main class="app-content">
+
+        <section id="salePage" class="app-page">
+            <!-- Page Vente -->
+        </section>
+
+        <section id="historyPage" class="app-page" hidden>
+            <!-- Page Historique -->
+        </section>
+
+        <section id="recapPage" class="app-page" hidden>
+            <!-- Page Récapitulatif -->
+        </section>
+
+        <section id="settingsPage" class="app-page" hidden>
+            <!-- Page Paramètres -->
+        </section>
+
+    </main>
+
+    <nav class="bottom-navigation">
+        <!-- Navigation principale -->
+    </nav>
+
+</main>
+```
+
+Important :
+
+- il ne doit y avoir qu’un seul `<h1>Ma caisse</h1>` ;
+- il ne doit y avoir qu’un seul header principal ;
+- la navigation doit rester en dehors des pages ;
+- chaque page doit utiliser la classe `.app-page` ;
+- une seule page doit être visible à la fois.
+
+---
+
+## 4. Fichiers CSS
+
+### `assets/css/app.css`
+
+Contient les styles communs à toute l’application :
+
+- variables CSS ;
+- couleurs ;
+- typographie ;
+- header ;
+- navigation ;
+- pages ;
+- boutons généraux ;
+- modales ;
+- gestion de l’attribut `hidden`.
+
+Exemple important :
+
+```css
+.app-page[hidden] {
+    display: none !important;
+}
+```
+
+Sans cette règle, plusieurs pages peuvent apparaître en même temps.
+
+Variables recommandées :
+
+```css
+:root {
+    --color-primary: #13ad54;
+    --color-background: #f5f7fa;
+    --color-surface: #ffffff;
+    --color-text: #111827;
+    --color-muted: #667085;
+    --color-border: #e5e7eb;
+    --radius-card: 18px;
+    --navigation-height: 72px;
+}
+```
+
+---
+
+### `assets/css/vente.css`
+
+Contient uniquement les styles de la page Vente :
+
+- disposition ticket/catalogue ;
+- colonne de gauche ;
+- grille des produits ;
+- cartes produits ;
+- total ;
+- bouton Encaisser.
+
+---
+
+### `assets/css/encaissement.css`
+
+Contient uniquement les styles de la fenêtre d’encaissement :
+
+- choix du moyen de paiement ;
+- montant reçu ;
+- monnaie à rendre ;
+- bouton de validation ;
+- fenêtre modale.
+
+---
+
+### `assets/css/historique.css`
+
+Contient les styles de la page Historique :
+
+- liste des tickets ;
+- date ;
+- total ;
+- détails des ventes ;
+- bouton d’ouverture d’un ticket.
+
+---
+
+### `assets/css/recap.css`
+
+Contient les styles de la page Récapitulatif :
+
+- chiffre d’affaires ;
+- nombre de ventes ;
+- moyens de paiement ;
+- produits vendus ;
+- cartes statistiques ;
+- sélecteur de date.
+
+---
+
+### `assets/css/responsive.css`
+
+Adapte l’application à différentes tailles d’écran.
+
+Exemple :
+
+```css
+@media (max-width: 800px) {
+    .pos-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+```
+
+---
+
+## 5. Fichiers JavaScript
+
+### `assets/js/products.js`
+
+Contient uniquement la liste des produits.
+
+Exemple :
+
+```javascript
+"use strict";
+
+const PRODUCTS = [
+    {
+        id: "cornet-vanille",
+        name: "Cornet Vanille",
+        price: 2.5,
+        category: "glaces",
+        icon: "🍦"
+    },
+    {
+        id: "sandwich-1",
+        name: "Sandwich 1",
+        price: 6,
+        category: "sandwichs",
+        icon: "🥪"
+    },
+    {
+        id: "eau",
+        name: "Eau",
+        price: 1.5,
+        category: "boissons",
+        icon: "💧"
+    }
+];
+```
+
+Règle :
+
+- ce fichier contient les données des produits ;
+- il ne doit pas gérer les clics ;
+- il ne doit pas modifier le ticket ;
+- il ne doit pas contenir de navigation.
+
+---
+
+### `assets/js/app.js`
+
+C’est le fichier principal de l’application.
+
+Il gère :
+
+- la date ;
+- la navigation ;
+- le titre de la page ;
+- l’onglet actif ;
+- l’affichage et le masquage des pages.
+
+Exemple :
+
+```javascript
+"use strict";
+
+document.addEventListener("DOMContentLoaded", () => {
+    initNavigation();
+    updateCurrentDate();
+    showPage("salePage", "Vente");
+});
+
+function initNavigation() {
+    document.querySelectorAll(".nav-button").forEach((button) => {
+        button.addEventListener("click", () => {
+            showPage(
+                button.dataset.page,
+                button.dataset.title
+            );
+        });
+    });
+}
+
+function showPage(pageId, pageTitle) {
+    document.querySelectorAll(".app-page").forEach((page) => {
+        page.hidden = page.id !== pageId;
+    });
+
+    document.querySelectorAll(".nav-button").forEach((button) => {
+        const isActive = button.dataset.page === pageId;
+
+        button.classList.toggle("active", isActive);
+    });
+
+    const titleElement = document.getElementById("current-page-title");
+
+    if (titleElement) {
+        titleElement.textContent = pageTitle;
+    }
+
+    if (pageId === "recapPage" && typeof renderRecap === "function") {
+        renderRecap();
+    }
+
+    if (
+        pageId === "historyPage" &&
+        typeof renderHistory === "function"
+    ) {
+        renderHistory();
+    }
+}
+
+function updateCurrentDate() {
+    const dateElement = document.getElementById("currentDate");
+
+    if (!dateElement) {
+        return;
+    }
+
+    dateElement.textContent = new Date().toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+    });
+}
+```
+
+Règle importante :
+
+- la navigation doit être gérée dans un seul fichier ;
+- `recap.js` ne doit pas créer son propre header ;
+- `historique.js` ne doit pas modifier la navigation ;
+- il ne doit pas y avoir plusieurs fonctions concurrentes pour ouvrir une page.
+
+---
+
+### `assets/js/vente.js`
+
+Gère la page Vente.
+
+Responsabilités :
+
+- afficher les produits ;
+- ajouter un produit au ticket ;
+- augmenter une quantité ;
+- calculer le total ;
+- afficher le ticket ;
+- vider le ticket ;
+- activer ou désactiver le bouton Encaisser.
+
+Variables principales :
+
+```javascript
+let ticket = [];
+```
+
+Fonctions principales :
+
+```javascript
+renderProducts();
+createProductCard();
+addProductToTicket();
+calculateTotal();
+renderTicket();
+clearTicket();
+initVente();
+```
+
+Important :
+
+le bouton Supprimer doit avoir l’identifiant attendu par le JavaScript :
+
+```html
+<button
+    id="clear-ticket"
+    type="button"
+    class="ticket-clear">
+    Supprimer
+</button>
+```
+
+---
+
+### `assets/js/encaissement.js`
+
+Gère la validation du paiement.
+
+Responsabilités :
+
+- ouvrir la fenêtre d’encaissement ;
+- choisir Espèces ou Carte ;
+- saisir le montant reçu ;
+- calculer la monnaie ;
+- valider la vente ;
+- enregistrer la vente ;
+- vider le ticket ;
+- fermer la fenêtre.
+
+Une vente enregistrée doit contenir au minimum :
+
+```javascript
+const sale = {
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    paymentMethod: selectedPaymentMethod,
+    total: calculateTotal(),
+    items: ticket.map((item) => ({ ...item }))
+};
+```
+
+---
+
+### `assets/js/storage.js`
+
+Gère la sauvegarde des données.
+
+Version actuelle possible : `localStorage`.
+
+Exemple :
+
+```javascript
+"use strict";
+
+const STORAGE_KEYS = {
+    sales: "caisse_sales",
+    settings: "caisse_settings"
+};
+
+function getSales() {
+    const savedSales = localStorage.getItem(STORAGE_KEYS.sales);
+
+    if (!savedSales) {
+        return [];
+    }
+
+    try {
+        return JSON.parse(savedSales);
+    } catch (error) {
+        console.error("Impossible de lire les ventes.", error);
+        return [];
+    }
+}
+
+function saveSales(sales) {
+    localStorage.setItem(
+        STORAGE_KEYS.sales,
+        JSON.stringify(sales)
+    );
+}
+
+function addSale(sale) {
+    const sales = getSales();
+
+    sales.push(sale);
+    saveSales(sales);
+}
+```
+
+Important :
+
+- ne pas enregistrer directement les ventes dans `recap.js` ;
+- ne pas enregistrer directement les ventes dans `historique.js` ;
+- toutes les sauvegardes passent par `storage.js`.
+
+---
+
+### `assets/js/historique.js`
+
+Affiche les ventes déjà enregistrées.
+
+Responsabilités :
+
+- lire les ventes ;
+- les trier de la plus récente à la plus ancienne ;
+- afficher la date ;
+- afficher le total ;
+- afficher le moyen de paiement ;
+- ouvrir le détail d’une vente.
+
+Il ne doit pas modifier le ticket actuel.
+
+---
+
+### `assets/js/recap.js`
+
+Calcule et affiche les statistiques.
+
+Responsabilités :
+
+- filtrer les ventes par date ;
+- calculer le chiffre d’affaires ;
+- calculer le nombre de ventes ;
+- calculer les paiements ;
+- calculer les quantités vendues ;
+- afficher les résultats.
+
+Exemple de calcul du chiffre d’affaires :
+
+```javascript
+const totalRevenue = sales.reduce((sum, sale) => {
+    return sum + sale.total;
+}, 0);
+```
+
+Exemple de calcul des moyens de paiement :
+
+```javascript
+function calculatePaymentTotals(sales) {
+    return sales.reduce((totals, sale) => {
+        const method = sale.paymentMethod;
+
+        totals[method] = (totals[method] ?? 0) + sale.total;
+
+        return totals;
+    }, {});
+}
+```
+
+---
+
+## 6. Navigation principale
+
+HTML recommandé :
+
+```html
+<nav class="bottom-navigation">
+
+    <button
+        type="button"
+        class="nav-button active"
+        data-page="salePage"
+        data-title="Vente">
+        Vente
+    </button>
+
+    <button
+        type="button"
+        class="nav-button"
+        data-page="historyPage"
+        data-title="Historique">
+        Historique
+    </button>
+
+    <button
+        type="button"
+        class="nav-button"
+        data-page="recapPage"
+        data-title="Récapitulatif">
+        Récapitulatif
+    </button>
+
+    <button
+        type="button"
+        class="nav-button"
+        data-page="settingsPage"
+        data-title="Paramètres">
+        Paramètres
+    </button>
+
+</nav>
+```
+
+Les valeurs `data-page` doivent correspondre exactement aux identifiants des sections.
+
+Exemple correct :
+
+```html
+<button data-page="recapPage">Récapitulatif</button>
+<section id="recapPage" class="app-page" hidden></section>
+```
+
+Exemple incorrect :
+
+```html
+<button data-page="recapPage">Récapitulatif</button>
+<section id="page-recap"></section>
+```
+
+---
+
+## 7. Circulation des données
+
+```text
+products.js
+    ↓
+vente.js affiche le catalogue
+    ↓
+l’utilisateur ajoute des produits
+    ↓
+ticket[]
+    ↓
+encaissement.js valide la vente
+    ↓
+storage.js sauvegarde la vente
+    ↓
+historique.js affiche les ventes
+    ↓
+recap.js calcule les statistiques
+```
+
+Exemple :
+
+```text
+Cornet Vanille
+    ↓
+Ajout au ticket
+    ↓
+Total : 2,50 €
+    ↓
+Paiement en espèces
+    ↓
+Vente enregistrée
+    ↓
+Visible dans Historique
+    ↓
+Ajoutée au chiffre d’affaires du Récapitulatif
+```
+
+---
+
+## 8. Format recommandé d’une vente
+
+```javascript
+{
+    id: "identifiant-unique",
+    createdAt: "2026-07-20T14:30:00.000Z",
+    paymentMethod: "cash",
+    total: 8.5,
+    items: [
+        {
+            id: "cornet-vanille",
+            name: "Cornet Vanille",
+            price: 2.5,
+            quantity: 1
+        },
+        {
+            id: "sandwich-1",
+            name: "Sandwich 1",
+            price: 6,
+            quantity: 1
+        }
+    ]
+}
+```
+
+Valeurs recommandées pour `paymentMethod` :
+
+```text
+cash
+card
+```
+
+Il vaut mieux enregistrer des valeurs techniques simples, puis afficher leur traduction :
+
+```javascript
+const PAYMENT_LABELS = {
+    cash: "Espèces",
+    card: "Carte bancaire"
+};
+```
+
+---
+
+## 9. Règles importantes du projet
+
+### Une seule responsabilité par fichier
+
+```text
+app.js            navigation générale
+vente.js          ticket et produits
+encaissement.js   validation du paiement
+storage.js        sauvegarde
+historique.js     liste des ventes
+recap.js          statistiques
+products.js       catalogue
+```
+
+### Un seul header principal
+
+Il ne doit y avoir qu’un seul :
+
+```html
+<h1>Ma caisse</h1>
+```
+
+### Une seule navigation
+
+Il ne doit y avoir qu’une seule barre :
+
+```html
+<nav class="bottom-navigation">
+```
+
+### Une seule fonction de changement de page
+
+Utiliser uniquement :
+
+```javascript
+showPage(pageId, pageTitle);
+```
+
+Ne pas créer dans `recap.js` une deuxième méthode qui affiche manuellement la page.
+
+### Toujours vérifier les éléments du DOM
+
+```javascript
+const element = document.getElementById("mon-element");
+
+if (!element) {
+    return;
+}
+```
+
+### Toujours attendre le chargement du DOM
+
+```javascript
+document.addEventListener("DOMContentLoaded", () => {
+    // Initialisation
+});
+```
+
+---
+
+## 10. Problèmes fréquents
+
+### Deux titres « Ma caisse »
+
+Cause probable :
+
+- deux headers dans le HTML ;
+- un ancien header du récapitulatif encore présent ;
+- un fichier PHP qui ajoute un second bloc.
+
+Solution :
+
+chercher dans tout le projet :
+
+```text
+Ma caisse
+```
+
+et ne garder qu’un seul `<h1>`.
+
+---
+
+### Le bouton Récapitulatif ne devient pas actif
+
+Vérifier :
+
+```html
+data-page="recapPage"
+```
+
+et :
+
+```html
+id="recapPage"
+```
+
+Les deux doivent être identiques.
+
+Vérifier aussi que le clic passe bien par :
+
+```javascript
+showPage("recapPage", "Récapitulatif");
+```
+
+---
+
+### La navigation n’apparaît pas
+
+Vérifier le CSS :
+
+```css
+.bottom-navigation {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+```
+
+Ajouter de l’espace sous le contenu :
+
+```css
+.app-content {
+    padding-bottom: 72px;
+}
+```
+
+---
+
+### Toutes les pages apparaissent en même temps
+
+Ajouter :
+
+```css
+.app-page[hidden] {
+    display: none !important;
+}
+```
+
+---
+
+### Le bouton Supprimer ne fonctionne pas
+
+Le JavaScript cherche :
+
+```javascript
+document.getElementById("clear-ticket");
+```
+
+Le HTML doit donc contenir :
+
+```html
+id="clear-ticket"
+```
+
+---
+
+### Le CSS ou le JavaScript ne se met pas à jour
+
+Faire un rechargement forcé :
+
+```text
+Mac : Cmd + Shift + R
+Windows : Ctrl + Shift + R
+```
+
+Avec WordPress, utiliser `filemtime()` dans `functions.php`.
+
+---
+
+### Une fonction existe mais ne se déclenche pas
+
+Vérifier dans la console :
+
+```javascript
+console.log("Initialisation");
+```
+
+Puis vérifier :
+
+- que le fichier JavaScript est bien chargé ;
+- que le nom de la fonction est correct ;
+- que l’élément HTML existe ;
+- que le code s’exécute après `DOMContentLoaded` ;
+- qu’aucune erreur précédente ne bloque le script.
+
+---
+
+## 11. Outils de débogage
+
+Dans la console du navigateur :
+
+### Vérifier si un élément existe
+
+```javascript
+document.getElementById("recapPage");
+```
+
+### Vérifier les boutons de navigation
+
+```javascript
+document.querySelectorAll(".nav-button");
+```
+
+### Vérifier les ventes enregistrées
+
+```javascript
+JSON.parse(localStorage.getItem("caisse_sales"));
+```
+
+### Effacer toutes les ventes de test
+
+```javascript
+localStorage.removeItem("caisse_sales");
+```
+
+Attention : cette commande supprime toutes les ventes enregistrées localement.
+
+### Vérifier la page active
+
+```javascript
+document.querySelector(".nav-button.active");
+```
+
+---
+
+## 12. Limites actuelles
+
+Avec `localStorage` :
+
+- les données restent seulement dans le navigateur utilisé ;
+- les données ne sont pas partagées entre plusieurs appareils ;
+- vider le stockage du navigateur supprime les ventes ;
+- il n’y a pas de sauvegarde distante ;
+- il n’y a pas encore de comptes utilisateurs ;
+- il n’y a pas encore de sécurité serveur.
+
+Pour une vraie utilisation commerciale, il faudra ensuite passer à :
+
+- une base de données ;
+- une API ;
+- une authentification ;
+- une sauvegarde ;
+- une gestion des droits ;
+- un export des ventes.
+
+---
+
+## 13. Prochaines étapes recommandées
+
+Ordre conseillé :
+
+1. stabiliser la navigation ;
+2. terminer la page Vente ;
+3. terminer l’encaissement ;
+4. vérifier l’enregistrement des ventes ;
+5. terminer l’Historique ;
+6. terminer le Récapitulatif ;
+7. ajouter le filtre par date ;
+8. ajouter les Paramètres ;
+9. ajouter la gestion des produits ;
+10. ajouter le stock ;
+11. ajouter l’export CSV ;
+12. ajouter une base de données.
+
+---
+
+## 14. Fonctionnalités futures possibles
+
+- gestion des quantités ;
+- suppression d’une ligne du ticket ;
+- remises ;
+- TVA ;
+- ouverture et fermeture de caisse ;
+- annulation d’une vente ;
+- remboursement ;
+- impression ticket ;
+- export CSV ;
+- filtre par jour, semaine ou mois ;
+- gestion des employés ;
+- mot de passe administrateur ;
+- gestion du stock ;
+- alerte stock faible ;
+- statistiques par produit ;
+- statistiques par moyen de paiement ;
+- ticket moyen ;
+- produits les plus vendus ;
+- sauvegarde en base de données ;
+- fonctionnement hors ligne ;
+- synchronisation entre appareils.
+
+---
+
+## 15. Tableau récapitulatif
+
+| Besoin | Fichier |
+|---|---|
+| Ajouter un produit | `products.js` |
+| Modifier le ticket | `vente.js` |
+| Calculer le total | `vente.js` |
+| Valider un paiement | `encaissement.js` |
+| Sauvegarder une vente | `storage.js` |
+| Afficher l’historique | `historique.js` |
+| Calculer le chiffre d’affaires | `recap.js` |
+| Changer de page | `app.js` |
+| Modifier le header | `caisse-app.php` et `app.css` |
+| Modifier le catalogue | `caisse-app.php` et `vente.css` |
+| Modifier la page récap | `caisse-app.php`, `recap.css`, `recap.js` |
+| Charger un fichier | `functions.php` |
+
+---
+
+## 16. Convention de nommage
+
+### Identifiants HTML
+
+Utiliser le camelCase pour les pages :
+
+```text
+salePage
+historyPage
+recapPage
+settingsPage
+```
+
+### Classes CSS
+
+Utiliser des noms lisibles avec tirets :
+
+```text
+app-header
+nav-button
+ticket-panel
+product-card
+recap-card
+```
+
+### Fonctions JavaScript
+
+Utiliser des verbes :
+
+```text
+renderProducts
+renderTicket
+addProductToTicket
+calculateTotal
+showPage
+saveSales
+renderRecap
+```
+
+### Constantes
+
+Utiliser des majuscules :
+
+```javascript
+const PRODUCTS = [];
+const STORAGE_KEYS = {};
+const PAYMENT_LABELS = {};
+```
+
+---
+
+## 17. Règle finale
+
+Avant d’ajouter une fonctionnalité, toujours se demander :
+
+```text
+Est-ce une donnée ?
+Est-ce de l’affichage ?
+Est-ce une action utilisateur ?
+Est-ce une sauvegarde ?
+Est-ce une statistique ?
+Est-ce de la navigation ?
+```
+
+Puis placer le code dans le fichier responsable.
+
+Cette séparation rend le projet :
+
+- plus lisible ;
+- plus facile à corriger ;
+- plus facile à améliorer ;
+- plus simple à reprendre après plusieurs semaines ;
+- plus proche d’un vrai projet professionnel.
