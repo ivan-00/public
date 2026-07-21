@@ -1,3 +1,8 @@
+<header class="top-header">
+    <h1>Ma caisse</h1>
+    <div class="header-date" id="currentDate"></div>
+</header>
+
 <section id="page-recap" class="app-page" hidden>
 
     <header class="app-header recap-header">
@@ -5,8 +10,7 @@
             id="back-to-sale-from-recap"
             class="icon-button"
             type="button"
-            aria-label="Retour à la vente"
-        >
+            aria-label="Retour à la vente">
             ←
         </button>
 

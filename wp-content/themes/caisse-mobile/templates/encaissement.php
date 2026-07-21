@@ -1,3 +1,7 @@
+<header class="top-header">
+    <h1>Ma caisse</h1>
+    <div class="header-date" id="currentDate"></div>
+</header>
 <section id="page-encaissement" class="app-page" hidden>
 
     <header class="app-header checkout-header">
@@ -12,7 +16,6 @@
 
         <h1>Encaissement</h1>
     </header>
-
     <div class="checkout-layout">
 
         <section class="checkout-summary">

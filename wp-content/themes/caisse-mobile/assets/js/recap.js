@@ -96,3 +96,21 @@ function initRecap() {
     .getElementById("back-to-sale-from-recap")
     ?.addEventListener("click", closeRecap);
 }
+function updateCurrentDate() {
+    const dateElement = document.getElementById("currentDate");
+
+    if (!dateElement) {
+        return;
+    }
+
+    const today = new Date();
+
+    dateElement.textContent = today.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    });
+}
+
+updateCurrentDate();
