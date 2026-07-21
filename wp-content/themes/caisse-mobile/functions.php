@@ -55,10 +55,19 @@ function caisse_mobile_enqueue_assets(): void
         true
     );
 
+
+    wp_enqueue_script(
+        'caisse-mobile-recap',
+        $theme_uri . '/assets/js/recap.js',
+        ['caisse-mobile-storage', 'caisse-mobile-vente'],
+        filemtime($theme_path . '/assets/js/recap.js'),
+        true
+    );
+
     wp_enqueue_script(
         'caisse-mobile-app',
         $theme_uri . '/assets/js/app.js',
-        ['caisse-mobile-vente', 'caisse-mobile-encaissement'],
+        ['caisse-mobile-vente', 'caisse-mobile-encaissement', 'caisse-mobile-recap'],
         filemtime($theme_path . '/assets/js/app.js'),
         true
     );
@@ -72,17 +81,3 @@ function caisse_mobile_theme_setup(): void
 }
 
 add_action('after_setup_theme', 'caisse_mobile_theme_setup');
-$recap_path = get_template_directory() . '/assets/js/recap.js';
-$recap_url  = get_template_directory_uri() . '/assets/js/recap.js';
-
-wp_enqueue_script(
-    'caisse-mobile-recap',
-    $recap_url,
-    [
-        'caisse-mobile-storage',
-        'caisse-mobile-vente',
-        'caisse-mobile-encaissement'
-    ],
-    file_exists($recap_path) ? filemtime($recap_path) : null,
-    true
-);

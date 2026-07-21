@@ -1,11 +1,5 @@
 "use strict";
 
-document.addEventListener("DOMContentLoaded", () => {
-    initVente();
-    updateCurrentDate();
-    showPage("salePage", "Vente");
-});
-
 let ticket = [];
 
 function formatPrice(price) {
@@ -236,48 +230,5 @@ function initVente() {
     }
 }
 
-function updateCurrentDate() {
-    const dateElement = document.getElementById("currentDate");
 
-    if (!dateElement) {
-        return;
-    }
-
-    const today = new Date();
-
-    dateElement.textContent = today.toLocaleDateString("fr-FR", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-    });
-}
-
-document.querySelectorAll(".nav-button").forEach((button) => {
-    button.addEventListener("click", () => {
-        showPage(
-            button.dataset.page,
-            button.dataset.title
-        );
-    });
-});
-
-function showPage(pageId, title) {
-
-    // Afficher la bonne page
-    document.querySelectorAll(".app-page").forEach(page => {
-        page.hidden = page.id !== pageId;
-    });
-
-    // Activer le bon bouton
-    document.querySelectorAll(".nav-button").forEach(button => {
-        button.classList.toggle(
-            "active",
-            button.dataset.page === pageId
-        );
-    });
-
-    // Changer le titre
-    document.getElementById("current-page-title").textContent = title;
-}
 

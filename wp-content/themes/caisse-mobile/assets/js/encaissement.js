@@ -4,27 +4,6 @@ let selectedPaymentMethod = "cash";
 let receivedAmount = 0;
 let amountInput = "";
 
-function showPage(pageId) {
-  const requestedPage = document.getElementById(pageId);
-
-  console.log("Page demandée :", requestedPage);
-
-  if (!requestedPage) {
-    console.error(`La page #${pageId} est introuvable.`);
-    return;
-  }
-
-  document.querySelectorAll(".app-page").forEach((page) => {
-    page.classList.remove("app-page--active");
-    page.hidden = true;
-  });
-
-  requestedPage.hidden = false;
-  requestedPage.classList.add("app-page--active");
-
-  console.log("Page affichée :", pageId);
-}
-
 function renderCheckoutTicket() {
   const checkoutItems = document.getElementById("checkout-ticket-items");
   const checkoutTotal = document.getElementById("checkout-total");
@@ -87,7 +66,7 @@ function openCheckout() {
 }
 
 function backToSale() {
-  showPage("page-vente");
+  showPage("salePage", "Vente");
 }
 
 function selectPaymentMethod(method) {
@@ -316,7 +295,7 @@ function resetSale(saveBeforeReset = true) {
   }
 
   renderTicket();
-  showPage("page-vente");
+  showPage("salePage", "Vente");
 }
 function initEncaissement() {
 

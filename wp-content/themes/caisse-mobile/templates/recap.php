@@ -1,42 +1,26 @@
-<header class="top-header">
-    <h1>Ma caisse</h1>
-    <div class="header-date" id="currentDate"></div>
-</header>
-
-<section id="page-recap" class="app-page" hidden>
-
-    <header class="app-header recap-header">
-        <button
-            id="back-to-sale-from-recap"
-            class="icon-button"
-            type="button"
-            aria-label="Retour à la vente">
-            ←
-        </button>
-
-        <h1>Récapitulatif</h1>
-    </header>
+<section id="recapPage" class="app-page" hidden>
 
     <div class="recap-content">
 
-        <section class="recap-card">
-            <span>Chiffre d’affaires</span>
-
-            <strong id="recap-revenue">
-                0,00 €
-            </strong>
+        <section class="recap-toolbar recap-card">
+            <label for="recap-date">Journée affichée</label>
+            <input id="recap-date" type="date">
         </section>
 
-        <section class="recap-card">
-            <span>Nombre de ventes</span>
+        <div class="recap-summary-grid">
+            <section class="recap-card">
+                <span>Chiffre d’affaires</span>
+                <strong id="recap-revenue">0,00 €</strong>
+            </section>
 
-            <strong id="recap-sales-count">
-                0
-            </strong>
-        </section>
+            <section class="recap-card">
+                <span>Nombre de ventes</span>
+                <strong id="recap-sales-count">0</strong>
+            </section>
+        </div>
 
         <section class="recap-card">
-            <h2>Paiements</h2>
+            <h2>Paiements du jour</h2>
 
             <div class="recap-row">
                 <span>Espèces</span>
@@ -50,22 +34,13 @@
         </section>
 
         <section class="recap-card">
-            <h2>Ventes par catégorie</h2>
+            <h2>Produits vendus</h2>
+            <div id="recap-products-list" class="recap-products-list"></div>
+        </section>
 
-            <div class="recap-row">
-                <span>Sandwichs</span>
-                <strong id="recap-sandwichs">0</strong>
-            </div>
-
-            <div class="recap-row">
-                <span>Boissons</span>
-                <strong id="recap-boissons">0</strong>
-            </div>
-
-            <div class="recap-row">
-                <span>Glaces</span>
-                <strong id="recap-glaces">0</strong>
-            </div>
+        <section class="recap-card">
+            <h2>Historique des paiements de la journée</h2>
+            <div id="recap-payment-history" class="recap-payment-history"></div>
         </section>
 
     </div>

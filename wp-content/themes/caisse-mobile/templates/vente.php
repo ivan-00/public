@@ -99,11 +99,6 @@
     <section id="historyPage" class="app-page" hidden>
         <!-- contenu de l'historique -->
     </section>
-
-    <section id="recapPage" class="app-page" hidden>
-        <!-- contenu du récapitulatif -->
-    </section>
-
     <section id="settingsPage" class="app-page" hidden>
         <!-- contenu des paramètres -->
     </section>
